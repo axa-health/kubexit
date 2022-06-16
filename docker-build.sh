@@ -11,7 +11,7 @@ USE_DEFAULT_BUILD_CONTAINER="no"
 BUILD_CONTAINER="kubexit"
 
 PUSH="no"
-TAG="0.3.2"
+TAG="0.3.1"
 IMAGE_PREFIX="axahealth"
 
 function print_help {
