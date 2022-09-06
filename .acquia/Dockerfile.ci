@@ -1,0 +1,50 @@
+ARG REPO_LOCATION
+FROM ${REPO_LOCATION}golang:1.18
+ARG K3D_VERSION=v5.4.4
+
+RUN apt-get update && \
+    apt-get install -y \
+    git \
+    bash \
+    gcc \
+    curl \
+    tar \
+    tzdata \
+    gettext \
+    jq
+
+# ENVs
+ENV GO_BINDATA_VERSION=v1.0.0 \
+    GOLANGCI_LINT_VERSION=v1.47.1 \
+    MISSPELL_VERSION=v0.3.4 \
+    GORELEASER_VERSION=v1.10.2 \
+    K8S_VERSION=v1.23.9 \
+    HELM_VERSION=v3.9.1
+
+# Installing docker
+RUN curl -fsSL https://get.docker.com -o get-docker.sh
+RUN sh get-docker.sh
+
+# Download go-bindata binary to bin folder in $GOPATH
+RUN mkdir -p /usr/local/bin \
+    && curl -fsSL -o /usr/local/bin/go-bindata https://github.com/containous/go-bindata/releases/download/${GO_BINDATA_VERSION}/go-bindata \
+    && chmod +x /usr/local/bin/go-bindata
+
+# Download golangci-lint binary to bin folder in $GOPATH
+RUN curl -sSfL https://raw.githubusercontent.com/golangci/golangci-lint/master/install.sh | sh -s -- -b $(go env GOPATH)/bin ${GOLANGCI_LINT_VERSION}
+
+# Download misspell binary to bin folder in $GOPATH
+RUN curl -sfL https://raw.githubusercontent.com/client9/misspell/master/install-misspell.sh | bash -s -- -b $GOPATH/bin ${MISSPELL_VERSION}
+
+# Download goreleaser binary to bin folder in $GOPATH
+RUN go install github.com/goreleaser/goreleaser@${GORELEASER_VERSION}
+
+RUN curl -LO "https://dl.k8s.io/release/${K8S_VERSION}/bin/linux/amd64/kubectl"
+RUN install -o root -g root -m 0755 kubectl /usr/local/bin/kubectl
+
+# Install k3d
+RUN curl -s https://raw.githubusercontent.com/rancher/k3d/main/install.sh | TAG=${K3D_VERSION} bash
+
+# Install helm
+RUN curl https://get.helm.sh/helm-${HELM_VERSION}-linux-amd64.tar.gz | tar -xz
+RUN mv linux-amd64/helm /usr/local/bin
