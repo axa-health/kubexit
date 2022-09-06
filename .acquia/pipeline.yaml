@@ -30,6 +30,11 @@ pre_build:
       sed -i 's#golang:1.14.1-alpine3.11#${REPO_LOCATION}golang:1.14.1-alpine3.11#' mirror/Dockerfile
       sed -i 's#FROM alpine:3.11#FROM ${REPO_LOCATION}alpine:3.11#' mirror/Dockerfile
       cd mirror
+      git remote add upstream https://github.com/acquia/kubexit.git
+      git fetch upstream
+      git diff origin/master...8bb3aef14ad7a01dd8ea4eee628cb812e32011b2 > changes.patch
+      git apply changes.patch
+      rm changes.patch
       export GOOS=linux CGO_ENABLED=0 ARCH="amd64" OS="linux"
       cat Dockerfile
 
