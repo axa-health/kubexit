@@ -32,7 +32,7 @@ pre_build:
       cd mirror
       git remote add upstream https://github.com/acquia/kubexit.git
       git fetch upstream
-      git diff origin/master...8bb3aef14ad7a01dd8ea4eee628cb812e32011b2 > changes.patch
+      git diff origin/master upstream/master > changes.patch
       git apply changes.patch
       rm changes.patch
       export GOOS=linux CGO_ENABLED=0 ARCH="amd64" OS="linux"
