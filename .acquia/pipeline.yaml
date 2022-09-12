@@ -54,7 +54,14 @@ post_build:
         echo "Testing fn-kubexit"
         echo "${JFROG_READONLY}"| docker login ${REPO_LOCATION} -u devops.readonly --password-stdin
         echo ${REPO_LOCATION}fn-kubexit:${GIT_COMMIT}
-        echo "Yet to be implemented"
+        docker run --name fn-kubexit-test --entrypoint "kubexit" ${REPO_LOCATION}fn-kubexit:${GIT_COMMIT}
+        docker logs fn-kubexit-test > wget.out
+        if ! (cat wget.out | grep "no arguments found")
+        then
+           echo "Did not find the expected text 'no arguments found' in the following output: $(cat wget.out)"
+           exit 1
+        fi
+        docker rm fn-kubexit-test
       args: -v /var/run/docker.sock:/var/run/docker.sock --net=host
       secrets:
         - type: vault
