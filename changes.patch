@@ -16,6 +16,24 @@ index 0000000..81fc4e9
 +    ignore:
 +    - dependency-name: k8s.io/*
 +    - dependency-name: sigs.k8s.io/*
+diff --git a/.github/workflows/e2e-test.yaml b/.github/workflows/e2e-test.yaml
+index 94166dd..0bf870d 100644
+--- a/.github/workflows/e2e-test.yaml
++++ b/.github/workflows/e2e-test.yaml
+@@ -7,6 +7,13 @@ on:
+     - master
+ 
+ jobs:
++  lint:
++    runs-on: ubuntu-latest
++    steps:
++      - name: Checkout
++        uses: actions/checkout@v2
++      - name: Lint Go Code
++        run: make lint
+   e2e-test:
+     runs-on: ubuntu-latest
+     steps:
 diff --git a/.gitignore b/.gitignore
 index e71dc17..15b0224 100644
 --- a/.gitignore
@@ -1431,7 +1449,7 @@ index bc8eb81..e208c36 100644
  		log.Println("Skipping ShutdownWithTimeout: child process not running")
  		return nil
 diff --git a/pkg/tombstone/tombstone.go b/pkg/tombstone/tombstone.go
-index fd011b6..639251b 100644
+index 68acf65..639251b 100644
 --- a/pkg/tombstone/tombstone.go
 +++ b/pkg/tombstone/tombstone.go
 @@ -5,12 +5,13 @@ import (
@@ -1449,7 +1467,16 @@ index fd011b6..639251b 100644
  	"github.com/fsnotify/fsnotify"
  	"sigs.k8s.io/yaml"
  )
-@@ -61,7 +62,7 @@ func (t *Tombstone) RecordBirth() error {
+@@ -23,7 +24,7 @@ type Tombstone struct {
+ 	Graveyard string `json:"-"`
+ 	Name      string `json:"-"`
+ 
+-	fileLock sync.Mutex `json:"-"`
++	fileLock sync.Mutex
+ }
+ 
+ func (t *Tombstone) Path() string {
+@@ -61,10 +62,10 @@ func (t *Tombstone) RecordBirth() error {
  	born := time.Now()
  	t.Born = &born
  
@@ -1457,8 +1484,12 @@ index fd011b6..639251b 100644
 +	log.Info("Creating tombstone:", "path", t.Path())
  	err := t.Write()
  	if err != nil {
- 		return fmt.Errorf("failed to create tombstone: %v", err)
-@@ -75,7 +76,7 @@ func (t *Tombstone) RecordDeath(exitCode int) error {
+-		return fmt.Errorf("failed to create tombstone: ", err)
++		return fmt.Errorf("failed to create tombstone: %v", err)
+ 	}
+ 	return nil
+ }
+@@ -75,10 +76,10 @@ func (t *Tombstone) RecordDeath(exitCode int) error {
  	t.Died = &died
  	t.ExitCode = &code
  
@@ -1466,17 +1497,22 @@ index fd011b6..639251b 100644
 +	log.Info("Updating tombstone:", "path", t.Path())
  	err := t.Write()
  	if err != nil {
- 		return fmt.Errorf("failed to update tombstone: %v", err)
-@@ -86,7 +87,7 @@ func (t *Tombstone) RecordDeath(exitCode int) error {
+-		return fmt.Errorf("failed to update tombstone: ", err)
++		return fmt.Errorf("failed to update tombstone: %v", err)
+ 	}
+ 	return nil
+ }
+@@ -86,7 +87,8 @@ func (t *Tombstone) RecordDeath(exitCode int) error {
  func (t *Tombstone) String() string {
  	inline, err := json.Marshal(t)
  	if err != nil {
--		log.Printf("Error: failed to marshal tombstone as json: %v\n", err)
+-		return fmt.Sprintf("%+v", t)
 +		log.Error(err, "Error: failed to marshal tombstone as json")
- 		return "{}"
++		return "{}"
  	}
  	return string(inline)
-@@ -112,24 +113,24 @@ func Read(graveyard, name string) (*Tombstone, error) {
+ }
+@@ -111,24 +113,24 @@ func Read(graveyard, name string) (*Tombstone, error) {
  	return &t, nil
  }
  
@@ -1513,7 +1549,7 @@ index fd011b6..639251b 100644
  	}
  }
  
-@@ -146,18 +147,20 @@ func Watch(ctx context.Context, graveyard string, eventHandler EventHandler) err
+@@ -145,18 +147,20 @@ func Watch(ctx context.Context, graveyard string, eventHandler EventHandler) err
  		for {
  			select {
  			case <-ctx.Done():
@@ -1537,7 +1573,7 @@ index fd011b6..639251b 100644
  				// TODO: wrap ctx with WithCancel and cancel on terminal errors, if any
  			}
  		}
-@@ -167,5 +170,21 @@ func Watch(ctx context.Context, graveyard string, eventHandler EventHandler) err
+@@ -166,5 +170,21 @@ func Watch(ctx context.Context, graveyard string, eventHandler EventHandler) err
  	if err != nil {
  		return fmt.Errorf("failed to add watcher: %v", err)
  	}
