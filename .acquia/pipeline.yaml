@@ -29,8 +29,8 @@ pre_build:
       cd mirror
       git apply --reject --whitespace=fix ../changes.patch
       sed -i '1 i\ARG REPO_LOCATION' Dockerfile
-      sed -i 's#golang:1.14.1-alpine3.11#${REPO_LOCATION}golang:1.14.1-alpine3.11#' Dockerfile
-      sed -i 's#FROM alpine:3.11#FROM ${REPO_LOCATION}alpine:3.11#' Dockerfile
+      sed -i 's#golang:1.18-alpine3.15#${REPO_LOCATION}golang:1.18-alpine3.15#' Dockerfile
+      sed -i 's#FROM alpine:3.15#FROM ${REPO_LOCATION}alpine:3.15#' Dockerfile
       export GOOS=linux CGO_ENABLED=0 ARCH="amd64" OS="linux"
       cat Dockerfile
 
