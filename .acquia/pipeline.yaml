@@ -33,7 +33,7 @@ pre_build:
       git remote add upstream https://github.com/acquia/kubexit.git
       git fetch upstream
       git diff origin/master upstream/master > changes.patch
-      git apply changes.patch
+      git apply --reject --whitespace=fix changes.patch
       rm changes.patch
       export GOOS=linux CGO_ENABLED=0 ARCH="amd64" OS="linux"
       cat Dockerfile
