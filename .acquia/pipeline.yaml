@@ -24,7 +24,7 @@ pre_build:
   clone_source_image:
   - steps:
     - | 
-      export KUBEXIT_VERSION=v0.3.2-acquia7
+      export KUBEXIT_VERSION=v0.3.2
       git clone --depth 1 --branch "${KUBEXIT_VERSION}" https://github.com/karlkfi/kubexit.git mirror
       sed -i '1 i\ARG REPO_LOCATION' mirror/Dockerfile
       sed -i 's#golang:1.14.1-alpine3.11#${REPO_LOCATION}golang:1.14.1-alpine3.11#' mirror/Dockerfile
