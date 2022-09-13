@@ -33,7 +33,7 @@ pre_build:
       sed -i 's#FROM alpine:3.15#FROM ${REPO_LOCATION}alpine:3.15#' Dockerfile
       sed -i 's#go build -o kubexit ./cmd/kubexit#GO111MODULE=auto go build -o kubexit ./mirror/cmd/kubexit#' Dockerfile
       sed -i '6i RUN echo $(ls -alh)' Dockerfile
-      sed -i '7i RUN echo $(pwd)' Dockerfile
+      sed -i '7i RUN go mod init' Dockerfile
       export GOOS=linux GO111MODULE=auto CGO_ENABLED=0 ARCH="amd64" OS="linux"
       cat Dockerfile
 
