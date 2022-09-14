@@ -55,16 +55,9 @@ post_build:
         echo "Testing fn-kubexit"
         echo "${JFROG_READONLY}"| docker login ${REPO_LOCATION} -u devops.readonly --password-stdin
         docker run --name fn-kubexit-test --entrypoint "kubexit" -e KUBEXIT_NAME=test-kubexit ${REPO_LOCATION}fn-kubexit:${GIT_COMMIT} sh
-        sleep 5
-        docker logs fn-kubexit-test &> out.log
-        docker logs fn-kubexit-test > out2.log
-        cat out.log
-        echo $(cat out.log)
-        cat out2.log
-        echo $(cat out2.log)
-        if ! (cat out.log | grep "Updating tombstone")
+        if ! (docker logs fn-kubexit-test 2>&1 | grep "Updating tombstone")
         then
-           echo "Did not find the expected text 'Updating tombstone' in the following output: $(cat out.log)"
+           echo "Did not find the expected text 'Updating tombstone' in the following output: $(docker logs fn-kubexit-test)"
            exit 1
         fi
         docker rm fn-kubexit-test
