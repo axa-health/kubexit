@@ -32,8 +32,6 @@ pre_build:
       sed -i 's#golang:1.18-alpine3.15#${REPO_LOCATION}golang:1.18-alpine3.15#' Dockerfile
       sed -i 's#FROM alpine:3.15#FROM ${REPO_LOCATION}alpine:3.15#' Dockerfile
       sed -i 's#COPY . /build/#COPY mirror /build/#' Dockerfile
-      sed -i '6i RUN echo $(ls -alh)' Dockerfile
-      sed -i '7i RUN echo $(pwd)' Dockerfile
       export GOOS=linux GO111MODULE=auto CGO_ENABLED=0 ARCH="amd64" OS="linux"
       cat Dockerfile
 
@@ -56,12 +54,11 @@ post_build:
       - |
         echo "Testing fn-kubexit"
         echo "${JFROG_READONLY}"| docker login ${REPO_LOCATION} -u devops.readonly --password-stdin
-        echo ${REPO_LOCATION}fn-kubexit:${GIT_COMMIT}
-        docker run --name fn-kubexit-test --entrypoint "kubexit" ${REPO_LOCATION}fn-kubexit:${GIT_COMMIT}
+        docker run --name fn-kubexit-test --entrypoint "kubexit" -e KUBEXIT_NAME=test-kubexit ${REPO_LOCATION}fn-kubexit:${GIT_COMMIT} sh
         docker logs fn-kubexit-test > wget.out
-        if ! (cat wget.out | grep "no arguments found")
+        if ! (cat wget.out | grep "Updating tombstone")
         then
-           echo "Did not find the expected text 'no arguments found' in the following output: $(cat wget.out)"
+           echo "Did not find the expected text 'Updating tombstone' in the following output: $(cat wget.out)"
            exit 1
         fi
         docker rm fn-kubexit-test
