@@ -10,8 +10,8 @@ USE_DEFAULT_BUILD_CONTAINER="no"
 # buildx pre and postfixes the container making the name unique
 BUILD_CONTAINER="kubexit"
 
-PUSH="no"
-TAG="0.3.1"
+PUSH="yes"
+TAG="0.3.5"
 IMAGE_PREFIX="axahealth"
 
 function print_help {
@@ -77,12 +77,12 @@ if [ "$PUSH" = "yes" ]; then
     --platform linux/arm64,linux/amd64 \
     --push \
     -t "$IMAGE_PREFIX"/kubexit:${TAG} \
-    .
+    ./mirror/.
 else
   # only build for the host platform if the image is not pushed (https://github.com/docker/buildx/issues/59)
-  docker buildx build \
+  docker buildx build  \
     ${DOCKER_ARGS} \
     --load \
     -t "$IMAGE_PREFIX"/kubexit:${TAG} \
-    .
+    ./mirror/.
 fi
