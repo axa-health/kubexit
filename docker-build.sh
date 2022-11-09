@@ -10,7 +10,7 @@ USE_DEFAULT_BUILD_CONTAINER="no"
 # buildx pre and postfixes the container making the name unique
 BUILD_CONTAINER="kubexit"
 
-PUSH="yes"
+PUSH="no"
 TAG="0.3.5"
 IMAGE_PREFIX="axahealth"
 
